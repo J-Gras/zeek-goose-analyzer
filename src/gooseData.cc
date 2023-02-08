@@ -12,6 +12,8 @@
 
 namespace binpac { namespace GOOSE {
 
+using namespace zeek;
+
 //==== Handling GOOSEData recusive structure ====
 
 // Using a std::stack instead of a recursive call to avoid potential attacks
@@ -105,7 +107,7 @@ static inline void assignDataRecordContent(
 			{
 				VectorVal * vv = asn1_bitstring_to_val(binpacGooseData.content()->boolArray());
 				if(vv)
-					recordGooseData->Assign(5, vv);
+					recordGooseData->Assign(5, {AdoptRef{}, vv});
 				// Else, it is malformed.
 			}
 			break;
@@ -115,7 +117,7 @@ static inline void assignDataRecordContent(
 		case OCTET_STRING:
 		case VISIBLE_STRING:
 		case MMS_STRING:
-			recordGooseData->Assign(6, bytestring_to_val(binpacGooseData.content()->asString()));
+			recordGooseData->Assign(6, to_stringval(binpacGooseData.content()->asString()));
 			break;
 		case OBJ_ID:
 			recordGooseData->Assign(6, asn1_oid_internal_to_val(binpacGooseData.content()->objId()));
@@ -153,7 +155,7 @@ static inline bool iteration_end_code(
 
 			// Append the Data to the VectorVal that was underneath
 			tmpVV = stackOfDataArrays.top().currentVectorVal;
-			tmpVV->Assign(tmpVV->Size(), tmpDat);
+			tmpVV->Assign(tmpVV->Size(), {AdoptRef{}, tmpDat});
 		}	
 
 		// Committing the last SequenceOfData into the Data :
@@ -212,7 +214,7 @@ static RecordVal * goose_data_array_as_record_val(
 				assignDataRecordContent(tmpDat, tmpTag, *dataPtr);
 
 				// Append the record to the vector
-				tmpVV->Assign(tmpVV->Size(), tmpDat);
+				tmpVV->Assign(tmpVV->Size(), {AdoptRef{},tmpDat});
 
 				// Add the length (in bytes) of the current GOOSEData to the count.
 				stackOfDataArrays.top().parsedBytes += dataPtr->totalSize();
@@ -237,7 +239,7 @@ static RecordVal * goose_data_array_as_record_val(
 			{
 				// Append the Data to the VectorVal that was underneath
 				tmpVV = stackOfDataArrays.top().currentVectorVal;
-				tmpVV->Assign(tmpVV->Size(), tmpDat);
+				tmpVV->Assign(tmpVV->Size(), {AdoptRef{},tmpDat});
 			}
 			else
 				return tmpDat; // Nothing else to do
@@ -281,7 +283,7 @@ VectorVal* goose_data_array_as_val(const VectorOfGOOSEData * dataArray)
 			// be equal to end_iter.
 			if(it == end_iter)
 			{
-				vv->Assign(vv->Size(), tmpDat);
+				vv->Assign(vv->Size(), {AdoptRef{}, tmpDat});
 
 				// Maybe notice the "Malformed packet" information somewhere.
 
@@ -289,7 +291,7 @@ VectorVal* goose_data_array_as_val(const VectorOfGOOSEData * dataArray)
 			}
 		}
 
-		vv->Assign(vv->Size(), tmpDat);
+		vv->Assign(vv->Size(), {AdoptRef{}, tmpDat});
 	}
 
 	return vv;

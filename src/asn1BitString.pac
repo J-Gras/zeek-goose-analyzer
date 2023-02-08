@@ -9,7 +9,7 @@ type ASN1BitString(nbBytes: uint32) = record
 # Utility C++ method used by the next BinPAC function
 %header{
 template<typename ByteIterator>
-void getBoolsFromByte(ByteIterator & byte_it, ByteIterator & byte_end, VectorVal & vv, uint8 & current_byte, unsigned int & vector_it)
+void getBoolsFromByte(ByteIterator & byte_it, ByteIterator & byte_end, zeek::VectorVal & vv, uint8 & current_byte, unsigned int & vector_it)
 {
 	for(; byte_it != byte_end; ++byte_it)
 	{
@@ -34,7 +34,7 @@ void getBoolsFromByte(ByteIterator & byte_it, ByteIterator & byte_end, VectorVal
 }
 %}
 
-function asn1_bitstring_to_val(bitStringRecord: ASN1BitString): VectorVal
+function asn1_bitstring_to_val(bitStringRecord: ASN1BitString): zeek::VectorVal
 %{
 	// Get the main information from the record :
 	uint8 pad = ${bitStringRecord.paddingBits};
@@ -43,7 +43,7 @@ function asn1_bitstring_to_val(bitStringRecord: ASN1BitString): VectorVal
 	const auto & data = ${bitStringRecord.data};
 
 	// Initializing return value :
-	auto vv = new VectorVal(new VectorType(base_type(TYPE_BOOL)));
+	auto vv = new zeek::VectorVal(zeek::make_intrusive<zeek::VectorType>(base_type(zeek::TYPE_BOOL)));
 
 	auto byte_it = data.begin(), bytes_end = data.end();
 	if(byte_it == bytes_end) // If no bytes

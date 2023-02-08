@@ -25,17 +25,17 @@ analyzer GOOSE withcontext {
 		{
 		auto result = zeek::make_intrusive<zeek::RecordVal>(zeek::BifType::Record::GOOSE::PDU);
 
-		result->Assign(0, bytestring_to_val(${pdu.gocbRef.str}));
+		result->Assign(0, to_stringval(${pdu.gocbRef.str}));
 		result->Assign(1, zeek::val_mgr->Count(${pdu.timeAllowedToLive.gooseUInt.val}));
-		result->Assign(2, bytestring_to_val(${pdu.datSet.str}));
+		result->Assign(2, to_stringval(${pdu.datSet.str}));
 		// goID is optional
 		if(${pdu.has_goID}) // check if pointer is NULL
 		{
-			result->Assign(3, bytestring_to_val(${pdu.goIDAndT.goID}));
-			result->Assign(4, gooseT_as_val(${pdu.goIDAndT.t.val}));
+			result->Assign(3, to_stringval(${pdu.goIDAndT.goID}));
+			result->Assign(4, {zeek::AdoptRef{}, gooseT_as_val(${pdu.goIDAndT.t.val})});
 		}
 		else
-			result->Assign(4, gooseT_as_val(${pdu.t}));
+			result->Assign(4, {zeek::AdoptRef{}, gooseT_as_val(${pdu.t})});
 
 		result->Assign(5, zeek::val_mgr->Count(${pdu.stNum.gooseUInt.val}));
 		result->Assign(6, zeek::val_mgr->Count(${pdu.sqNum.gooseUInt.val}));
@@ -50,7 +50,7 @@ analyzer GOOSE withcontext {
 
 		result->Assign(10, zeek::val_mgr->Count(${pdu.ndsComAndNumDatSetEntries.uintVal}));
 
-		result->Assign(11, goose_data_array_as_val(${pdu.allData}));
+		result->Assign(11, {zeek::AdoptRef{}, goose_data_array_as_val(${pdu.allData})});
 
 		return result;
 		}

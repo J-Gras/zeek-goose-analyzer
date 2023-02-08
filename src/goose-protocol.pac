@@ -15,12 +15,12 @@
 #include "binpac_bytestring.h"
 %}
 
-%include ../asn1/asn1.pac
+
 %include gooseInteger.pac
 %include asn1BitString.pac
 
 %header{
-	StringVal* asn1_oid_internal_to_val(const ASN1ObjectIdentifierInternal* oidi);
+	zeek::StringVal* asn1_oid_internal_to_val(const ASN1ObjectIdentifierInternal* oidi);
 %}
 
 # The input bytystring has to be of size 1 or more.
@@ -105,7 +105,7 @@ type ASN1ObjectIdentifierInternal(size: uint32) = record
 };
 
 %code{
-	StringVal* asn1_oid_internal_to_val(const ASN1ObjectIdentifierInternal* oidi)
+	zeek::StringVal* asn1_oid_internal_to_val(const ASN1ObjectIdentifierInternal* oidi)
 		{
 		return nullptr; //TODO:asn1_oid_to_val(oidi->data());
 		}
@@ -195,9 +195,9 @@ type IEC_UTC_Time = record {
 };
 
 # Converting IEC_UTC_Time to BroVal
-function gooseT_as_val(utc: IEC_UTC_Time): RecordVal
+function gooseT_as_val(utc: IEC_UTC_Time): zeek::RecordVal
 %{
-	auto rv = new RecordVal(BifType::Record::GOOSE::UTCTime);
+	auto rv = new zeek::RecordVal(zeek::BifType::Record::GOOSE::UTCTime);
 
 	rv->Assign(0, zeek::val_mgr->Count(${utc.secondsSince1970}));
 	rv->Assign(1, zeek::val_mgr->Count(${utc.nanoseconds}));
